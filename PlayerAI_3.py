@@ -3,10 +3,10 @@ from copy import deepcopy
 from my_2048_operation import *
 
 # monotonicity
-weight = [[pow(3, 3),  pow(3, 2),  pow(3, 1),  pow(3, 0)],
-          [pow(3, 4),  pow(3, 5),  pow(3, 6),  pow(3, 7)],
-          [pow(3, 11), pow(3, 10), pow(3, 9),  pow(3, 8)],
-          [pow(3, 12), pow(3, 13), pow(3, 14), pow(3, 15)]]
+weight = [[4,  3,  2,  1],
+          [5,  6,  7,  8],
+          [pow(3, 4), pow(3, 4), pow(3, 3),  pow(3, 2)],
+          [pow(3, 4), pow(3, 6), pow(3, 7), pow(3, 8)]]
 
 # smoothness
 k = 1

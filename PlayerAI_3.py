@@ -107,13 +107,13 @@ def expect_minimax(state, depth, is_max):
         total = 0
         cnt = 0
         minimum = float('inf')
-        alpha = 1.0
+        alpha = 0.8
         for cell in find_empty(state):
             new_state = deepcopy(state)
             new_state[cell[0]][cell[1]] = 2
             v = expect_minimax(new_state, depth-1, True)
             total += v
-            cnt += 0.6
+            cnt += 1
             minimum = min(minimum, v)
         avr = total/cnt
         res = alpha * avr + (1-alpha) * minimum

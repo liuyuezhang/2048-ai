@@ -3,10 +3,10 @@ from copy import deepcopy
 from my_2048_operation import *
 
 # monotonicity
-weight = [[4,  3,  2,  1],
-          [5,  6,  7,  8],
-          [pow(3, 4), pow(3, 4), pow(3, 3),  pow(3, 2)],
-          [pow(3, 4), pow(3, 6), pow(3, 7), pow(3, 8)]]
+weight = [[1,  1,  1,  1],
+          [3,  3,  3,  3],
+          [pow(3, 4),     pow(3, 4) - 1, pow(3, 3),  pow(3, 2)],
+          [pow(3, 4) + 1, pow(3, 6),     pow(3, 7),  pow(3, 8)]]
 
 # smoothness
 k = 1
@@ -133,6 +133,6 @@ class PlayerAI(BaseAI):
         for i in range(4):
             moved[i] = move(states[i], i)
             if moved[i]:
-                rewards[i] = expect_minimax(states[i], 3, False)
+                rewards[i] = expectimax(states[i], 3, False)
 
         return rewards.index(max(rewards))

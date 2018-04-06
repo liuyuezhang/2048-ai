@@ -68,6 +68,58 @@ def minimax(state, depth, alpha, beta, is_max):
         return v
 
 
+# expectimax search
+def expectimax(state, depth, is_max):
+    if depth == 0:
+        return heuristic(state)
+    if is_max:
+        v = float('-inf')
+        for i in range(4):
+            new_state = deepcopy(state)
+            if move(new_state, i):
+                v = max(v, expectimax(new_state, depth-1, False))
+        return v
+    else:
+        total = 0
+        cnt = 0
+        for cell in find_empty(state):
+            new_state = deepcopy(state)
+            new_state[cell[0]][cell[1]] = 2
+            v = expectimax(new_state, depth-1, True)
+            total += v
+            cnt += 1
+        avr = total/cnt
+        return avr
+
+
+# expect-minimax search
+def expect_minimax(state, depth, is_max):
+    if depth == 0:
+        return heuristic(state)
+    if is_max:
+        v = float('-inf')
+        for i in range(4):
+            new_state = deepcopy(state)
+            if move(new_state, i):
+                v = max(v, expect_minimax(new_state, depth-1, False))
+        return v
+    else:
+        total = 0
+        cnt = 0
+        minimum = float('inf')
+        alpha = 1.0
+        for cell in find_empty(state):
+            new_state = deepcopy(state)
+            new_state[cell[0]][cell[1]] = 2
+            v = expect_minimax(new_state, depth-1, True)
+            total += v
+            cnt += 0.6
+            minimum = min(minimum, v)
+        avr = total/cnt
+        res = alpha * avr + (1-alpha) * minimum
+        return res
+
+
 class PlayerAI(BaseAI):
     def getMove(self, grid):
         state = grid.map
@@ -81,6 +133,6 @@ class PlayerAI(BaseAI):
         for i in range(4):
             moved[i] = move(states[i], i)
             if moved[i]:
-                rewards[i] = minimax(states[i], 3, float('-inf'), float('inf'), False)
+                rewards[i] = expect_minimax(states[i], 3, False)
 
         return rewards.index(max(rewards))

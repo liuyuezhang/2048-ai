@@ -204,26 +204,29 @@ cdef int heuristic(state):
 
 
 # sample-expectimax search
-cdef int sample_expectimax(state, int depth, int sample, int is_max):
-    cdef int v, total, avr
+cdef float sample_expectimax(state, int depth, int sample, int is_max):
+    cdef float v, total, avr
     cdef int i
     cdef int cnt, num
+    cdef float p
 
     if depth == 0:
         return heuristic(state)
     if is_max:
+        p = 0.3
         # avoid using float('-inf') in Cython
         v = -2147483648
         for i in range(4):
             new_state = deepcopy(state)
             if move(new_state, i):
                 v = max(v, sample_expectimax(new_state, depth-1, sample, False))
-        return v
+        return (1-p) * heuristic(state) + p * v
     else:
         total = 0
         cnt = 0
         cells = find_empty(state)
         num = len(cells)
+        p = 1.0/num
         cell_to_search = []
         # Monte Carlo: random sampling
         if num > sample:
@@ -239,7 +242,7 @@ cdef int sample_expectimax(state, int depth, int sample, int is_max):
             total += v
             cnt += 1
         avr = total/cnt
-        return avr
+        return (1-p) * heuristic(state) + p * avr
 
 
 # policy function

@@ -153,21 +153,6 @@ def find_empty(state):
     return cells
 
 
-# Return the Tile with Maximum Value
-def find_max(state):
-    res = 0
-
-    for x in range(4):
-        for y in range(4):
-            res = max(res, state[x][y])
-
-    return res
-
-
-def out_bound(pos):
-    return pos[0] < 0 or pos[0] >= 4 or pos[1] < 0 or pos[1] >= 4
-
-
 def put(state):
     cells = find_empty(state)
     if len(cells) == 0:

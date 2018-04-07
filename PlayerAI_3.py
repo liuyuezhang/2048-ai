@@ -17,6 +17,6 @@ class PlayerAI(BaseAI):
         for i in range(4):
             moved[i] = move(states[i], i)
             if moved[i]:
-                rewards[i] = expectimax(states[i], 3, False)
+                rewards[i] = expectimax(states[i], 4, False)
         print(str(time.time() - t))
         return rewards.index(max(rewards))

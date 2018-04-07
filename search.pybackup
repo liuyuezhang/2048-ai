@@ -1,5 +1,4 @@
 from copy import deepcopy
-from my_2048_operation import *
 
 # monotonicity
 weight = [[1,  1,  1,  1],
@@ -11,6 +10,155 @@ weight = [[1,  1,  1,  1],
 k = 1
 
 
+# My 2048 Operation
+# Merge Tiles
+def merge(cells):
+    if len(cells) <= 1:
+        return cells
+
+    i = 0
+
+    while i < len(cells) - 1:
+        if cells[i] == cells[i+1]:
+            cells[i] *= 2
+
+            del cells[i+1]
+
+        i += 1
+
+
+def move_up(state):
+    r = range(4)
+
+    moved = False
+
+    for j in range(4):
+        cells = []
+
+        for i in r:
+            cell = state[i][j]
+
+            if cell != 0:
+                cells.append(cell)
+
+        merge(cells)
+
+        for i in r:
+            value = cells.pop(0) if cells else 0
+
+            if state[i][j] != value:
+                moved = True
+
+            state[i][j] = value
+
+    return moved
+
+
+def move_down(state):
+    r = range(3, -1, -1)
+
+    moved = False
+
+    for j in range(4):
+        cells = []
+
+        for i in r:
+            cell = state[i][j]
+
+            if cell != 0:
+                cells.append(cell)
+
+        merge(cells)
+
+        for i in r:
+            value = cells.pop(0) if cells else 0
+
+            if state[i][j] != value:
+                moved = True
+
+            state[i][j] = value
+
+    return moved
+
+
+def move_left(state):
+    r = range(4)
+
+    moved = False
+
+    for i in range(4):
+        cells = []
+
+        for j in r:
+            cell = state[i][j]
+
+            if cell != 0:
+                cells.append(cell)
+
+        merge(cells)
+
+        for j in r:
+            value = cells.pop(0) if cells else 0
+
+            if state[i][j] != value:
+                moved = True
+
+            state[i][j] = value
+
+    return moved
+
+
+def move_right(state):
+    r = range(3, -1, -1)
+
+    moved = False
+
+    for i in range(4):
+        cells = []
+
+        for j in r:
+            cell = state[i][j]
+
+            if cell != 0:
+                cells.append(cell)
+
+        merge(cells)
+
+        for j in r:
+            value = cells.pop(0) if cells else 0
+
+            if state[i][j] != value:
+                moved = True
+
+            state[i][j] = value
+
+    return moved
+
+
+def move(state, i):
+    if i == 0:
+        return move_up(state)
+    if i == 1:
+        return move_down(state)
+    if i == 2:
+        return move_left(state)
+    if i == 3:
+        return move_right(state)
+
+
+# Return All the Empty Cells
+def find_empty(state):
+    cells = []
+
+    for x in range(4):
+        for y in range(4):
+            if state[x][y] == 0:
+                cells.append((x, y))
+
+    return cells
+
+
+# Search
 # heuristic function
 def heuristic(state):
     reward = 0

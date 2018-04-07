@@ -1,4 +1,5 @@
 from copy import deepcopy
+from random import randint
 
 # monotonicity
 weight = [[1,  1,  1,  1],
@@ -229,7 +230,17 @@ def expectimax(state, depth, is_max):
     else:
         total = 0
         cnt = 0
-        for cell in find_empty(state):
+        cells = find_empty(state)
+        num = len(cells)
+        cell_to_search = []
+        # Monte Carlo: random sampling
+        if num > 4:
+            for i in range(4):
+                cell_to_search.append(cells[randint(0, num-1)])
+        else:
+            cell_to_search = cells
+
+        for cell in cell_to_search:
             new_state = deepcopy(state)
             new_state[cell[0]][cell[1]] = 2
             v = expectimax(new_state, depth-1, True)
@@ -237,3 +248,19 @@ def expectimax(state, depth, is_max):
             cnt += 1
         avr = total/cnt
         return avr
+
+
+# policy function
+def policy(state):
+    # be aware of deepcopy and []*4
+    states = [deepcopy(state), deepcopy(state), deepcopy(state), deepcopy(state)]
+    moved = [False]*4
+    rewards = [-float("inf")]*4
+
+    # 0: UP, 1:DOWN, 2:LEFT, 3:RIGHT
+    for i in range(4):
+        moved[i] = move(states[i], i)
+        if moved[i]:
+            rewards[i] = expectimax(states[i], 4, False)
+
+    return rewards.index(max(rewards))

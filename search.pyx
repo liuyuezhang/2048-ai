@@ -159,10 +159,21 @@ def find_empty(state):
     return cells
 
 
+# Return the number of empty tiles
+cdef int num_empty(state):
+    cdef cnt, x, y
+    cnt = 0
+    for x in range(4):
+        for y in range(4):
+            if state[x][y] == 0:
+                cnt += 1
+    return cnt
+
+
 # Search
 # heuristic function
-cdef float heuristic(state):
-    cdef float reward, max_tile
+cdef int heuristic(state):
+    cdef int reward, max_tile
     cdef int i, j
     reward = 0
     max_tile = 0
@@ -192,30 +203,67 @@ cdef float heuristic(state):
     return reward
 
 
-# expectimax search
-def expectimax(state, int depth, int is_max):
-    cdef float v
+# sample-expectimax search
+cdef int sample_expectimax(state, int depth, int sample, int is_max):
+    cdef int v, total, avr
     cdef int i
-    cdef float total, avr
-    cdef int cnt
+    cdef int cnt, num
 
     if depth == 0:
         return heuristic(state)
     if is_max:
-        v = float('-inf')
+        # avoid using float('-inf') in Cython
+        v = -2147483648
         for i in range(4):
             new_state = deepcopy(state)
             if move(new_state, i):
-                v = max(v, expectimax(new_state, depth-1, False))
+                v = max(v, sample_expectimax(new_state, depth-1, sample, False))
         return v
     else:
         total = 0
         cnt = 0
-        for cell in find_empty(state):
+        cells = find_empty(state)
+        num = len(cells)
+        cell_to_search = []
+        # Monte Carlo: random sampling
+        if num > sample:
+            for i in range(sample):
+                cell_to_search.append(cells[randint(0, num-1)])
+        else:
+            cell_to_search = cells
+
+        for cell in cell_to_search:
             new_state = deepcopy(state)
             new_state[cell[0]][cell[1]] = 2
-            v = expectimax(new_state, depth-1, True)
+            v = sample_expectimax(new_state, depth-1, sample, True)
             total += v
             cnt += 1
         avr = total/cnt
         return avr
+
+
+# policy function
+def policy(state):
+    cdef int i
+    cdef int num, depth, sample
+
+    # be aware of deepcopy and []*4
+    states = [deepcopy(state), deepcopy(state), deepcopy(state), deepcopy(state)]
+    moved = [False]*4
+    rewards = [-float("inf")]*4
+
+    # 0: UP, 1:DOWN, 2:LEFT, 3:RIGHT
+    for i in range(4):
+        moved[i] = move(states[i], i)
+        if moved[i]:
+            num = num_empty(states[i])
+            if num > 8:
+                depth = 3
+                sample = num
+            else:
+                depth = 4
+                sample = num
+
+            rewards[i] = sample_expectimax(states[i], depth, sample, False)
+
+    return rewards.index(max(rewards))

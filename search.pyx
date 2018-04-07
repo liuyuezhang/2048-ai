@@ -203,6 +203,35 @@ cdef int heuristic(state):
     return reward
 
 
+# expectimax search
+cdef float expectimax(state, int depth, int is_max):
+    cdef float v
+    cdef int i
+    cdef float total, avr
+    cdef int cnt
+
+    if depth == 0:
+        return heuristic(state)
+    if is_max:
+        v = float('-inf')
+        for i in range(4):
+            new_state = deepcopy(state)
+            if move(new_state, i):
+                v = max(v, expectimax(new_state, depth-1, False))
+        return v
+    else:
+        total = 0
+        cnt = 0
+        for cell in find_empty(state):
+            new_state = deepcopy(state)
+            new_state[cell[0]][cell[1]] = 2
+            v = expectimax(new_state, depth-1, True)
+            total += v
+            cnt += 1
+        avr = total/cnt
+        return avr
+
+
 # sample-expectimax search
 cdef float sample_expectimax(state, int depth, int sample, int is_max):
     cdef float v, total, avr
@@ -263,10 +292,14 @@ def policy(state):
             if num > 8:
                 depth = 3
                 sample = num
-            else:
+            elif num > 3:
                 depth = 4
                 sample = num
+            else:
+                depth = 5
+                sample = 3
 
+            #rewards[i] = expectimax(states[i], 3, False)
             rewards[i] = sample_expectimax(states[i], depth, sample, False)
 
     return rewards.index(max(rewards))

@@ -217,7 +217,8 @@ cdef float expectimax(state, int depth, int is_max):
     if depth == 0:
         return heuristic(state)
     if is_max:
-        v = float('-inf')
+         # avoid using float('-inf') in Cython
+        v = -2147483648
         for i in range(4):
             new_state = deepcopy(state)
             if move(new_state, i):

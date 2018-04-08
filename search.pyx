@@ -1,15 +1,18 @@
 from copy import deepcopy
 from random import randint
 
+# Parameters
 # monotonicity
-weight = [[1,  1,  1,  1],
-          [3,  3,  3,  3],
-          [pow(3, 4),     pow(3, 4) - 1, pow(3, 3),  pow(3, 2)],
-          [pow(3, 4) + 1, pow(3, 6),     pow(3, 7),  pow(3, 8)]]
+weight = [[pow(3, 1),  1,  1,  1],
+          [pow(3, 2),  3,  3,  3],
+          [pow(3, 3),  9,  9,  9],
+          [pow(3, 5), pow(3, 6), pow(3, 7),  pow(3, 8)]]
 
 # smoothness
 k = 1
 
+# empty tiles
+cdef float EMPTY_WEIGHT = 270.0
 
 # My 2048 Operation
 # Merge Tiles
@@ -172,11 +175,12 @@ cdef int num_empty(state):
 
 # Search
 # heuristic function
-cdef int heuristic(state):
-    cdef int reward, max_tile
+cdef float heuristic(state):
+    cdef float reward, max_tile
     cdef int i, j
     reward = 0
     max_tile = 0
+
     for i in range(4):
         for j in range(4):
             # monotonicity
@@ -192,7 +196,7 @@ cdef int heuristic(state):
                 reward -= k * abs(state[i][j] - state[i][j + 1])
             # empty tiles
             if state[i][j] == 0:
-                reward += 2
+                reward += EMPTY_WEIGHT
             # find max tile
             if state[i][j] > max_tile:
                 max_tile = state[i][j]
@@ -289,17 +293,16 @@ def policy(state):
         moved[i] = move(states[i], i)
         if moved[i]:
             num = num_empty(states[i])
-            if num > 8:
+            if num > 7:
                 depth = 3
-                sample = num
             elif num > 3:
                 depth = 4
-                sample = num
-            else:
+            elif num == 3:
                 depth = 5
-                sample = 3
+            else:
+                depth = 6
 
-            #rewards[i] = expectimax(states[i], 3, False)
-            rewards[i] = sample_expectimax(states[i], depth, sample, False)
+            rewards[i] = expectimax(states[i], depth, False)
+            #rewards[i] = sample_expectimax(states[i], depth, sample, False)
 
     return rewards.index(max(rewards))
